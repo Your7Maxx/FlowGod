@@ -256,7 +256,7 @@ def print_https(cpu, data, size,):
             print("{}\t{}\t{}\t{}".format(event.pid,event.uid,proc_name,proc_cmd))
             print("===========================")
 
-    log_submit(str(int2ip(event.saddr)),str(event.sport),str(int2ip(event.daddr)),str(event.dport),"HTTPS",event.pid,event.uid,proc_name,proc_cmd)
+    #log_submit(str(int2ip(event.saddr)),str(event.sport),str(int2ip(event.daddr)),str(event.dport),"HTTPS",event.pid,event.uid,proc_name,proc_cmd)
 # udp
 bpf_kprobe_udp = BPF(src_file = "./udp/kprobe_udp.c")
 bpf_sock_udp = BPF(src_file = "./udp/udp.c")
