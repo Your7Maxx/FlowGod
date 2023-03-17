@@ -327,7 +327,7 @@ threads.append(t3)
 
 if __name__ == '__main__':
     print(Flowgod_banner)
-    print("===============开始捕获===============")
+    print("--------------------------------------Start------------------------------------")
     for i in range(3):
         threads[i].start()
     for i in range(3):

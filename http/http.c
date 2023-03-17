@@ -42,6 +42,11 @@ int http_matching(struct __sk_buff *skb){
         if(ip->nextp == IP_TCP){
 
             struct tcp_t *tcp = cursor_advance(cursor,sizeof(*tcp));
+
+            if (!tcp->flag_psh) { //过滤掉不携带数据的包
+                return 0;
+            }
+
             struct data_key key = {};
 
             key.proto = 6;

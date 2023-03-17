@@ -34,6 +34,10 @@ BPF_PERF_OUTPUT(events_tcp);
         struct ip_t *ip = cursor_advance(cursor,sizeof(*ip));
         if(ip->nextp == IP_TCP){ //IP_TCP(0x06)、IPPROTO_UDP
             struct tcp_t *tcp = cursor_advance(cursor, sizeof(*tcp));
+
+            if (!tcp->flag_psh) { //过滤掉不携带数据的包
+                return 0;
+            }
             struct data_key key = {};
 
             key.proto = 6;
