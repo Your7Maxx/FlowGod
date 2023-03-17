@@ -246,15 +246,17 @@ def print_https(cpu, data, size,):
     print("[*] 原始数据报处理后提取的payload信息：")
     if crlf in payload_str:
         printUntilCRLF(payload_str)
-
     print("-------------------------------------------------------------------------------")
     print("PID\tUID\tCOMM\tCMD")
-    with open(f'/proc/{event.pid}/comm', 'r') as proc_comm:
-        proc_name = proc_comm.read().rstrip()
-        with open(f'/proc/{event.pid}/cmdline', 'r') as proc_cmd:
-            proc_cmd = proc_cmd.read().rstrip()
-            print("{}\t{}\t{}\t{}".format(event.pid,event.uid,proc_name,proc_cmd))
-            print("===========================")
+    try:
+        with open(f'/proc/{event.pid}/comm', 'r') as proc_comm:
+            proc_name = proc_comm.read().rstrip()
+            with open(f'/proc/{event.pid}/cmdline', 'r') as proc_cmd:
+                proc_cmd = proc_cmd.read().rstrip()
+                print("{}\t{}\t{}\t{}".format(event.pid,event.uid,proc_name,proc_cmd))
+                print("===========================")
+    except:
+        proc_name = event.comm.decode()
 
     #log_submit(str(int2ip(event.saddr)),str(event.sport),str(int2ip(event.daddr)),str(event.dport),"HTTPS",event.pid,event.uid,proc_name,proc_cmd)
 # udp
