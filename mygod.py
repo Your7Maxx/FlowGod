@@ -146,7 +146,7 @@ def print_http(cpu,data,size):
         payload_header = ETH_HLEN + ip_header_length + tcp_header_length
         print("[*] 原始数据报处理后提取的payload信息：")
         payload_str = packet_str[payload_header:(len(packet_bytearray))]
-        print("----------------------------------------------")
+        print("-------------------------------------------------------------------------------")
 
         try:
             payload_str = bytearray(payload_str).decode('utf-8')
@@ -213,7 +213,7 @@ def print_udp(cpu,data,size):
         payload_header = ETH_HLEN + ip_header_length + UDP_HLEN
         print("[*] 原始数据报处理后提取的payload信息：")
         payload_str = packet_str[payload_header:(len(packet_bytearray))]
-        print("----------------------------------------------")
+        print("-------------------------------------------------------------------------------")
         try:
             payload_str = bytearray(payload_str).decode('utf-8')
             print(payload_str)
@@ -254,9 +254,9 @@ def print_https(cpu, data, size,):
             with open(f'/proc/{event.pid}/cmdline', 'r') as proc_cmd:
                 proc_cmd = proc_cmd.read().rstrip()
                 print("{}\t{}\t{}\t{}".format(event.pid,event.uid,proc_name,proc_cmd))
-                print("===========================")
+                print("-------------------------------------------------------------------------------")
     except:
-        proc_name = event.comm.decode()
+        proc_name = "NULL"
 
     #log_submit(str(int2ip(event.saddr)),str(event.sport),str(int2ip(event.daddr)),str(event.dport),"HTTPS",event.pid,event.uid,proc_name,proc_cmd)
 # udp
