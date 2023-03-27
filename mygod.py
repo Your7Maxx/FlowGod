@@ -259,6 +259,29 @@ def print_https(cpu, data, size,):
         proc_name = "NULL"
 
     #log_submit(str(int2ip(event.saddr)),str(event.sport),str(int2ip(event.daddr)),str(event.dport),"HTTPS",event.pid,event.uid,proc_name,proc_cmd)
+
+
+def print_py_https(cpu, data, size,):
+    event = bpf_kprobe_py_https["events_py_https"].event(data)
+    print("[*] 原始数据报处理后提取的ip/端口信息：")
+    print(str(int2ip(event.saddr))+"[{}]".format(str(event.sport))+"---->"+str(int2ip(event.daddr))+"[{}]".format(str(event.dport)))
+    print("[*] 原始数据报处理后提取的payload信息：")
+    print(event.req_header.decode())
+    print(event.req_body.decode())
+
+    print("-------------------------------------------------------------------------------")
+    print("PID\tUID\tCOMM\tCMD")
+    try:
+        with open(f'/proc/{event.pid}/comm', 'r') as proc_comm:
+            proc_name = proc_comm.read().rstrip()
+            with open(f'/proc/{event.pid}/cmdline', 'r') as proc_cmd:
+                proc_cmd = proc_cmd.read().rstrip()
+                print("{}\t{}\t{}\t{}".format(event.pid,event.uid,proc_name,proc_cmd))
+                print("-------------------------------------------------------------------------------")
+    except:
+        proc_name = "NULL"
+
+
 # udp
 bpf_kprobe_udp = BPF(src_file = "./udp/kprobe_udp.c")
 bpf_sock_udp = BPF(src_file = "./udp/udp.c")
@@ -295,6 +318,15 @@ bpf_kprobe_https.attach_kprobe(event="tcp_sendmsg", fn_name="trace_tcp_sendmsg")
 bpf_kprobe_https["events_https"].open_perf_buffer(print_https)
 
 
+# https for python
+bpf_uprobe_py_ssl = BPF(src_file = "./https/uprobe_py_ssl.c")
+bpf_uprobe_py_ssl.attach_uprobe(name="ssl", sym="SSL_write_ex",fn_name="probe_SSL_rw_ex_enter")
+bpf_kprobe_py_https = BPF(src_file = "./https/https_py_tcp.c")
+bpf_kprobe_py_https.attach_kprobe(event="tcp_sendmsg", fn_name="trace_py_tcp_sendmsg")
+
+bpf_kprobe_py_https["events_py_https"].open_perf_buffer(print_py_https)
+
+
 def udp_buffer_poll():
     while True:
         try:
@@ -317,20 +349,32 @@ def https_buffer_poll():
         except KeyboardInterrupt:
             exit()
 
-threads = []
 
-t1 = threading.Thread(target=udp_buffer_poll)
-t2 = threading.Thread(target=http_buffer_poll)
-t3 = threading.Thread(target=https_buffer_poll)
+def py_https_buffer_poll():
+    while True:
+        try:
+            bpf_kprobe_py_https.perf_buffer_poll()
+        except KeyboardInterrupt:
+            exit()
 
-threads.append(t1)
-threads.append(t2)
-threads.append(t3)
+
 
 if __name__ == '__main__':
+    threads = []
+    t1 = threading.Thread(target=udp_buffer_poll)
+    t2 = threading.Thread(target=http_buffer_poll)
+    t3 = threading.Thread(target=https_buffer_poll)
+    t4 = threading.Thread(target=py_https_buffer_poll)
+
+    threads.append(t1)
+    threads.append(t2)
+    threads.append(t3)
+    threads.append(t4)
+
     print(Flowgod_banner)
     print("--------------------------------------Start------------------------------------")
-    for i in range(3):
+    
+    for i in range(4):
         threads[i].start()
-    for i in range(3):
+    for i in range(4):
         threads[i].join()
