@@ -4,15 +4,13 @@
 #define ETH_HLEN 14
 
 struct data_key {
-     u8 proto;
-     u32 saddr;
-     u32 daddr;
-     u16 sport;
-     u16 dport;
+     u32 src_ip;
+     u32 dst_ip;
+     unsigned short src_port;
+     unsigned short dst_port;
  };
 
 struct data_value {
-     u32 nic;
      u32 pid;
      u32 uid;
      u32 gid;
@@ -31,11 +29,11 @@ int trace_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk) {
     u64 uid_gid = bpf_get_current_uid_gid();
         // Forming the key structure.
         // These strange transformations will be explained below.
-    struct data_key key = {.proto = 6};
-    key.saddr = htonl(saddr);
-    key.daddr = htonl(daddr);
-    key.sport = sport;
-    key.dport = htons(dport);
+    struct data_key key = {};
+    key.src_ip = htonl(saddr);
+    key.dst_ip = htonl(daddr);
+    key.src_port = sport;
+    key.dst_port = htons(dport);
         // Forming a structure with the process properties:
     struct data_value value = {};
     value.pid = pid_tgid >> 32;
