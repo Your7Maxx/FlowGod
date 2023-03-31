@@ -2,9 +2,7 @@
 #include <linux/fs.h>
 #include <net/sock.h>
 #include <linux/string.h>
-#define MAX_HEADER_SIZE 200
-#define MAX_BODY_SIZE 200
-
+#define MAX_BUFFER_SIZE 400
 
 struct data_key {
         u32 pid;
@@ -14,25 +12,39 @@ struct data_key {
 };
 
 struct data_value {
-    char req_header[MAX_HEADER_SIZE];
-    char req_body[MAX_BODY_SIZE];
+    char buf[MAX_BUFFER_SIZE];
 };
 
 struct https_data {
     u32 pid;
-    //u32 tid;
     u32 uid;
-    //char comm[TASK_COMM_LEN];
     u32 saddr;
     u32 daddr;
     u16 sport;
     u16 dport;
-    char req_header[MAX_HEADER_SIZE];
-    char req_body[MAX_BODY_SIZE];
+    char buf[MAX_BUFFER_SIZE];
 };
 
+struct session_key {
+    u32 saddr;
+    u32 daddr;
+    u16 sport;
+    u16 dport;
+ };
+
+
+struct Leaf {
+	int timestamp;            //timestamp in ns
+};
+
+
+
 BPF_TABLE_PUBLIC("extern", struct data_key, struct data_value, https_data, 4096);
+BPF_HASH(sessions, struct session_key, struct Leaf, 1024);
+
 BPF_PERF_OUTPUT(events_py_https);
+
+
 
 int trace_py_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
 {
@@ -48,15 +60,21 @@ int trace_py_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
     u32 tid = (u32)pid_tgid;
     u32 uid = bpf_get_current_uid_gid();
 
+
+    struct session_key session_key = {};
+    session_key.saddr = htonl(saddr);
+    session_key.daddr = htonl(daddr);
+    session_key.sport = sport;
+    session_key.dport = htons(dport);
+
+
     struct https_data data = {};
     data.saddr = htonl(saddr);
     data.daddr = htonl(daddr);
     data.sport = sport;
     data.dport = htons(dport);
     data.pid = pid;
-   // data.tid = tid;
     data.uid = uid;
-   // bpf_get_current_comm(&data.comm, sizeof(data.comm));
 
     struct data_key key = {};
     key.pid = pid;
@@ -70,16 +88,21 @@ int trace_py_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
     if (!value){
         return 0;
     }
-   // bpf_trace_printk("3");
-    bpf_probe_read(&(data.req_header), MAX_HEADER_SIZE, (char *)(value->req_header));
-    bpf_probe_read(&(data.req_body), MAX_BODY_SIZE, (char *)(value->req_body));
 
-    //bpf_trace_printk("%s",data.req_body);
+    bpf_probe_read(&(data.buf), MAX_BUFFER_SIZE, (char *)(value->buf));
+  //  bpf_probe_read(&(data.req_body), MAX_BODY_SIZE, (char *)(value->req_body));
+    struct Leaf zero = {0};
 
-    events_py_https.perf_submit(ctx, &data, sizeof(struct https_data));
+    sessions.lookup_or_try_init(&session_key,&zero);
+    struct Leaf * lookup_leaf = sessions.lookup(&session_key);
+	if(lookup_leaf) {
+		//send packet to userspace
+	    events_py_https.perf_submit(ctx, &data, sizeof(struct https_data));
+	    https_data.delete(&key);
+        return 0;
+    }
 
     https_data.delete(&key);
-
     return 0;
 
 }

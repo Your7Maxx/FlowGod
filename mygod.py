@@ -63,12 +63,20 @@ def is_dns_query(packet_str):
     else:
         return False
 
-def printUntilCRLF(s):
-    s = s.split(crlf)
-    for i in range(len(s)):
-        print(s[i])
+def printUntilCRLF(s,type):
+    if type == 'str':
+        crlf = '\r\n'
+        s = s.split(crlf)
+        for i in range(len(s)):
+            print(s[i])
 
-def cleanup():
+    elif type == 'bytestr':
+        crlf = b'\r\n'
+        s = s.split(crlf)
+        for i in range(len(s)):
+            print(s[i].decode())
+
+def cleanup(bpf_sessions):
     # get current time in seconds
     current_time = int(time.time())
     # looking for leaf having:
@@ -133,11 +141,7 @@ def print_http(cpu,data,size):
     packet_str = skb.raw[:]
     if not is_dns_query(packet_str): # 暂时排除dns请求
         packet_bytearray = bytearray(packet_str)
-       # print(packet_bytearray)
-      #  print("[*] bcc前端捕获到的原始数据报:")
-      #  print(packet_bytearray)
 
-        # calculate ip header length
         ip_header_length = packet_bytearray[ETH_HLEN]     # load Byte
         ip_header_length = ip_header_length & 0x0F        # mask bits 0..3
         ip_header_length = ip_header_length << 2          # shift to obtain length
@@ -157,29 +161,6 @@ def print_http(cpu,data,size):
         port_src = int.from_bytes(port_src_str,"big")
         port_dst = int.from_bytes(port_dst_str,"big")
 
-        '''
-        print(ip_src,type(ip_src))
-        print(ip_dst,type(ip_dst))
-        print(port_src,type(port_src))
-        print(port_dst,type(port_dst))
-
-        '''
-
-        '''
-        ip_src_str = packet_str_nb[ETH_HLEN + 12: ETH_HLEN + 16]
-        ip_dst_str = packet_str_nb[ETH_HLEN + 16:ETH_HLEN + 20]
-        port_src_str = packet_str_nb[ETH_HLEN + ip_header_length:ETH_HLEN + ip_header_length + 2]
-        port_dst_str = packet_str_nb[ETH_HLEN + ip_header_length + 2:ETH_HLEN + ip_header_length + 4]
-        ip_src_nb = int(binascii.hexlify(ip_src_str), 16)
-        ip_dst_nb = int(binascii.hexlify(ip_dst_str), 16)
-        port_src_nb = int(binascii.hexlify(port_src_str), 16)
-        port_dst_nb = int(binascii.hexlify(port_dst_str), 16)
-        '''
-        #current_Key = bpf_sessions.Key(ip_src_nb, ip_dst_nb, port_src_nb, port_dst_nb)
-
-
-
-
         tcp_header_length = packet_bytearray[ETH_HLEN + ip_header_length + 12]
         tcp_header_length = tcp_header_length & 0xF0
         tcp_header_length = tcp_header_length >> 2
@@ -189,20 +170,21 @@ def print_http(cpu,data,size):
         payload_str = packet_bytearray[payload_header:(len(packet_bytearray))].decode()
         payload_str = bytes(payload_str,encoding='utf8')
 
-        current_Key = bpf_sessions.Key(ip_src, ip_dst, port_src, port_dst)
+        current_Key = http_sessions.Key(ip_src, ip_dst, port_src, port_dst)
         #print('1111111111111111111111')
-        #print(payload_str)
+       # print(payload_str)
         try:
             if ((payload_str[:3] == b'GET') or (payload_str[:4] == b'POST')
             or (payload_str[:4] == b'HTTP') or (payload_str[:3] == b'PUT')
             or (payload_str[:6] == b'DELETE') or (payload_str[:4] == b'HEAD')):
-               # print("222222222222222222222")
-                if (((payload_str[:3] == b'GET') and (crlf2_0 in payload_str)) or ((payload_str[:3] != b'GET') and (crlf2 in payload_str) and (crlf2_0 not in payload_str))):
-                 #   print("2222222222222222222")
+                #print("222222222222222222222")
+                if (((payload_str[:3] == b'GET' or payload_str[:4] == b'HEAD' or payload_str[:6] == b'DELETE') and (crlf2_0 in payload_str))
+                or ((payload_str[:4] == b'POST' or payload_str[:3] == b'PUT') and (crlf2 in payload_str) and (crlf2_0 not in payload_str))):
+                    #print("3333333333333333333333")
                   #  print(payload_str.decode())
                     print("[*] 原始数据报处理后提取的payload信息：")
                     print("-------------------------------------------------------------------------------")
-                    printUntilCRLF(payload_str)
+                    printUntilCRLF(payload_str,'bytestr')
                     print("-------------------------------------------------------------------------------")
                     print("[*] 原始数据报处理后提取的ip/端口信息：")
                     print(int2ip(ip_src)+"[{}]".format(str(port_src))+"---->"+int2ip(ip_dst)+"[{}]".format(str(port_dst)))
@@ -217,23 +199,23 @@ def print_http(cpu,data,size):
                         print("-------------------------------------------------------------------------------")
                # log_submit(int2ip(ip_src),port_src,int2ip(ip_dst),port_dst,"TCP",skb.pid,skb.uid,proc_name,proc_cmd)
                     try:
-                        del bpf_sessions[current_Key]
+                        del http_sessions[current_Key]
                     except:
                         print("error during delete from bpf map")
                 else:
                  #   print("3333333333")
                     http_packet_dictionary[binascii.hexlify(current_Key)] = payload_str
             else:
-              #  print("44444444")
-                if (current_Key in bpf_sessions):
-                #    print("555555555")
+                #print("44444444")
+                if (current_Key in http_sessions):
+                    #print("555555555")
                     if (binascii.hexlify(current_Key) in http_packet_dictionary):
                         http_pre_string = http_packet_dictionary[binascii.hexlify(current_Key)]
                         if (crlf not in payload_str):
                             payload_str = http_pre_string + payload_str
                             print("[*] 原始数据报处理后提取的payload信息：")
                             print("-------------------------------------------------------------------------------")
-                            printUntilCRLF(payload_str)
+                            printUntilCRLF(payload_str,'bytestr')
                             print("-------------------------------------------------------------------------------")
                             print("[*] 原始数据报处理后提取的ip/端口信息：")
                             print(int2ip(ip_src)+"[{}]".format(str(port_src))+"---->"+int2ip(ip_dst)+"[{}]".format(str(port_dst)))
@@ -248,27 +230,27 @@ def print_http(cpu,data,size):
                                 print("-------------------------------------------------------------------------------")
                # log_submit(int2ip(ip_src),port_src,int2ip(ip_dst),port_dst,"TCP",skb.pid,skb.uid,proc_name,proc_cmd)
                             try:
-                                del bpf_sessions[current_Key]
+                                del http_sessions[current_Key]
                                 del http_packet_dictionary[binascii.hexlify(current_Key)]
                             except:
                                 print("[*] error deleting from map or dictionary")
                         else:
                             http_pre_string += payload_str
-                            if (len(prev_payload_string) > MAX_URL_STRING_LEN):
+                            if (len(http_pre_string) > MAX_URL_STRING_LEN):
                                 print("[*] request too large!")
                                 try:
-                                    del bpf_sessions[current_Key]
+                                    del http_sessions[current_Key]
                                     del http_packet_dictionary[binascii.hexlify(current_Key)]
                                 except:
                                     print("error deleting from map or dict")
-                            http_packet_dictionary[binascii.hexlify(current_Key)] = prev_payload_string
+                            http_packet_dictionary[binascii.hexlify(current_Key)] = http_pre_string
                     else:
                         try:
-                            del bpf_sessions[current_Key]
+                            del http_sessions[current_Key]
                         except:
-                            print("error del bpf_session")
+                            print("error del http_session")
             if (((http_packet_count) % CLEANUP_N_PACKETS) == 0):
-                cleanup()
+                cleanup(http_sessions)
         except:
             proc_name = skb.comm.decode()
 
@@ -285,8 +267,8 @@ def print_udp(cpu,data,size):
     packet_str = skb.raw[:]
     if not is_dns_query(packet_str): # 暂时排除dns请求
         packet_bytearray = bytearray(packet_str)
-       # print("[*] bcc前端捕获到的原始数据报:")
-       # print(packet_bytearray)
+        print("[*] bcc前端捕获到的原始数据报:")
+        print(packet_bytearray)
 
         # calculate ip header length
         ip_header_length = packet_bytearray[ETH_HLEN]     # load Byte
@@ -339,18 +321,69 @@ def print_udp(cpu,data,size):
 def print_https(cpu, data, size,):
     event = bpf_kprobe_https["events_https"].event(data)
     buf_size = event.len
+
     if event.buf_filled == 1:
-       # print(event.buf[:buf_size])
         payload_str = bytearray(event.buf[:buf_size]).decode()
+        payload_bytes_str = bytes(payload_str,encoding='utf-8')
+        print(payload_bytes_str)
+
+        current_Key = https_sessions.Key(event.saddr, event.daddr, event.sport, event.dport)
+
+        if ((payload_bytes_str[:3] == b'GET') or (payload_bytes_str[:4] == b'POST')
+            or (payload_bytes_str[:4] == b'HTTP') or (payload_bytes_str[:3] == b'PUT')
+            or (payload_bytes_str[:6] == b'DELETE') or (payload_bytes_str[:4] == b'HEAD')):
+            if crlf in payload_bytes_str:
+                print("[*] 原始数据报处理后提取的ip/端口信息：")
+                print(str(int2ip(event.saddr))+"[{}]".format(str(event.sport))+"---->"+str(int2ip(event.daddr))+"[{}]".format(str(event.dport)))
+                print("[*] 原始数据报处理后提取的payload信息：")
+                printUntilCRLF(payload_str,'str')
+                try:
+                    del https_sessions[current_Key]
+                except:
+                    print("error during delete from bpf map ")
+            else:
+                https_packet_dictionary[binascii.hexlify(current_Key)] = payload_bytes_str
+        else:
+            if (current_Key in https_sessions):
+                if (binascii.hexlify(current_Key) in https_packet_dictionary):
+                    prev_payload_string = https_packet_dictionary[binascii.hexlify(current_Key)]
+                    if (crlf in payload_bytes_str):
+                        prev_payload_string += payload_bytes_str
+                        print("[*] 原始数据报处理后提取的ip/端口信息：")
+                        print(str(int2ip(event.saddr))+"[{}]".format(str(event.sport))+"---->"+str(int2ip(event.daddr))+"[{}]".format(str(event.dport)))
+                        print("[*] 原始数据报处理后提取的payload信息：")
+                        printUntilCRLF(prev_payload_string.decode(),'str')
+                        try:
+                            del https_sessions[current_Key]
+                            del https_packet_dictionary[binascii.hexlify(current_Key)]
+
+                        except:
+                            print("error deleting from map or dictionary")
+                    else:
+                        prev_payload_string += payload_bytes_str
+                        if (len(prev_payload_string) > MAX_URL_STRING_LEN):
+                            print("url too long")
+                            try:
+                                del https_sessions[current_Key]
+                                del https_packet_dictionary[binascii.hexlify(current_Key)]
+                            except:
+                                print("error deleting from map or dict")
+                        https_packet_dictionary[binascii.hexlify(current_Key)] = prev_payload_string
+                else:
+                    try:
+                        del https_sessions[current_Key]
+                    except:
+                        print("error del https_session")
+        global https_packet_count
+        https_packet_count += 1
+        #print(https_packet_count)
+        if (((https_packet_count) % CLEANUP_N_PACKETS) == 0):
+            cleanup(https_sessions)
         #print(t)
     else:
         buf_size = 0
         buf = b""
-    print("[*] 原始数据报处理后提取的ip/端口信息：")
-    print(str(int2ip(event.saddr))+"[{}]".format(str(event.sport))+"---->"+str(int2ip(event.daddr))+"[{}]".format(str(event.dport)))
-    print("[*] 原始数据报处理后提取的payload信息：")
-    if crlf in payload_str:
-        printUntilCRLF(payload_str)
+
     print("-------------------------------------------------------------------------------")
     print("PID\tUID\tCOMM\tCMD")
     try:
@@ -362,10 +395,10 @@ def print_https(cpu, data, size,):
                 print("-------------------------------------------------------------------------------")
     except:
         proc_name = "NULL"
-
     #log_submit(str(int2ip(event.saddr)),str(event.sport),str(int2ip(event.daddr)),str(event.dport),"HTTPS",event.pid,event.uid,proc_name,proc_cmd)
 
 
+'''
 def print_py_https(cpu, data, size,):
     event = bpf_kprobe_py_https["events_py_https"].event(data)
     print("[*] 原始数据报处理后提取的ip/端口信息：")
@@ -385,7 +418,7 @@ def print_py_https(cpu, data, size,):
                 print("-------------------------------------------------------------------------------")
     except:
         proc_name = "NULL"
-
+'''
 
 # udp
 bpf_kprobe_udp = BPF(src_file = "./udp/kprobe_udp.c")
@@ -411,7 +444,7 @@ socket_fd_http = function_http_matching.sock
 sock_http = socket.fromfd(socket_fd_http,socket.PF_PACKET,  socket.SOCK_RAW,socket.IPPROTO_IP)
 sock_http.setblocking(True)
 
-bpf_sessions = bpf_sock_http.get_table("sessions")
+http_sessions = bpf_sock_http.get_table("sessions")
 http_packet_count = 0
 http_packet_dictionary = {}
 bpf_sock_http["events_http"].open_perf_buffer(print_http)
@@ -425,6 +458,9 @@ bpf_uprobe_ssl.attach_uretprobe(name="ssl", sym="SSL_write",fn_name="probe_SSL_w
 bpf_kprobe_https = BPF(src_file = "./https/myhttps.c")
 bpf_kprobe_https.attach_kprobe(event="tcp_sendmsg", fn_name="trace_tcp_sendmsg")
 
+https_sessions = bpf_kprobe_https.get_table("sessions")
+https_packet_count = 0
+https_packet_dictionary = {}
 bpf_kprobe_https["events_https"].open_perf_buffer(print_https)
 
 
@@ -460,14 +496,14 @@ def https_buffer_poll():
         except KeyboardInterrupt:
             exit()
 
-
+'''
 def py_https_buffer_poll():
     while True:
         try:
             bpf_kprobe_py_https.perf_buffer_poll()
         except KeyboardInterrupt:
             exit()
-
+'''
 
 
 if __name__ == '__main__':

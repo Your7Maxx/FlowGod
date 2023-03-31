@@ -12,7 +12,6 @@ struct data_key {
  };
 
 struct data_value {
-     u32 nic;
      u32 pid;
      u32 uid;
      u32 gid;

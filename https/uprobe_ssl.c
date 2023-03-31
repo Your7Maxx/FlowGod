@@ -1,6 +1,6 @@
 #include <linux/ptrace.h>
 #include <linux/sched.h>        /* For TASK_COMM_LEN */
-#define MAX_BUF_SIZE 415
+#define MAX_BUF_SIZE 380
 
 struct data_key {
         u32 pid;
@@ -112,3 +112,4 @@ int probe_SSL_read_exit(struct pt_regs *ctx) {
 int probe_SSL_write_exit(struct pt_regs *ctx) {
         return (SSL_exit(ctx, 1));
 }
+

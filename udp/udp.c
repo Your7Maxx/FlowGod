@@ -16,7 +16,6 @@ struct data_key {
  };
 
 struct data_value {
-     u32 nic;
      u32 pid;
      u32 uid;
      u32 gid;
@@ -49,7 +48,7 @@ BPF_PERF_OUTPUT(events_udp);
                 return 0;
             }
 
-            value->nic = skb->ifindex;
+
             events_udp.perf_submit_skb(skb,skb->len,value,sizeof(struct data_value));
             return 0;
         }
