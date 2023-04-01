@@ -5,4 +5,4 @@
                                      |  __| | |/ _ \ \ /\ / / | |_ |/ _ \ / _` |
                                      | |    | | (_) \ V  V /| |__| | (_) | (_| |
                                      |_|    |_|\___/ \_/\_/  \_____|\___/ \__,_|
-✨FlowGod is a powerful process-level network flow sniffer tool based on eBPF.
+✨ FlowGod is a powerful process-level network flow sniffer tool based on eBPF.
