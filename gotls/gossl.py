@@ -1,11 +1,23 @@
 from bcc import BPF
+import subprocess
+import re
+import  sys
 
-b = BPF(src_file = "gossl.c")
+print("---------------------start----------------------")
 
+def get_go_version(binary_file):
+    output = subprocess.check_output(["strings", binary_file]).decode()
+    pattern = r"go\d+\.\d+\.\d+"
+    matches = re.findall(pattern, output)
+    version_nums = matches[0][2:].split('.')
+    version_ints = [int(num) for num in version_nums]
 
-#b.attach_uprobe(name="/root/go/src/hello/hello",sym="crypto/tls.(*Conn).writeRecordLocked",fn_name="crack_https")
-b.attach_uprobe(name="/root/go/src/hello/hello",sym="crypto/tls.(*Conn).writeRecordLocked",fn_name="crack_https")
-
+    if version_ints < [1,17,0]:
+        print("[*]检测到目标程序的go编译版本小于1.17.0")
+        return 0
+    else:
+        print("[*]检测到目标程序的go编译版本大于1.17.0")
+        return 1
 
 def print_event(cpu,data,size):
     print("-----------------------------------------------")
@@ -17,11 +29,17 @@ def print_event(cpu,data,size):
     print("[*]数据包:")
     print(bytes(event.buf)[:event.len].decode())
 
-    #print("%d\t%d\t%s" % (event.pid,event.uid,event.parm1))
+binary_file = str(sys.argv[1])
 
-print("---------------------start----------------------")
-#print("%s\t%s\t%s" % ("PID","UID","PARM1"))
-#b.trace_print()
+b = BPF(src_file = "gossl.c")
+
+if get_go_version(binary_file):
+    b.attach_uprobe(name=binary_file,sym="crypto/tls.(*Conn).writeRecordLocked",fn_name="go_https_register")
+else:
+    b.attach_uprobe(name=binary_file,sym="crypto/tls.(*Conn).writeRecordLocked",fn_name="go_https_stack")
+
+
+
 b["events"].open_perf_buffer(print_event)
 
 while 1:
