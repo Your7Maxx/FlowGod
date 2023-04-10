@@ -52,7 +52,7 @@ def int2ip(rawip):
         result.insert(0,mod)
     return '.'.join(map(str,result))
 
-def is_dns_query(packet_str):
+    def is_dns_query(packet_str):
     ip_src_str = packet_str[ETH_HLEN + 12: ETH_HLEN + 16]  # ip source offset 12..15
     ip_dst_str = packet_str[ETH_HLEN + 16:ETH_HLEN + 20]   # ip dest   offset 16..19
 
@@ -126,7 +126,6 @@ def log_submit(sip,sport,dip,dport,protocal,pid,uid,comm,cmd):
 
     with open('./log/flow.log','a') as fd:
         fd.write(bpf_event_log)
-
 
 def print_http(cpu,data,size):
     class skbuffer_event(ct.Structure): # 兼容
@@ -316,7 +315,6 @@ def print_udp(cpu,data,size):
 
         except:
             proc_name = skb.comm.decode()
-
 
 def print_https(cpu, data, size,):
     event = bpf_kprobe_https["events_https"].event(data)
@@ -570,7 +568,7 @@ bpf_uprobe_py_ssl.attach_uprobe(name="ssl", sym="SSL_write_ex",fn_name="probe_SS
 bpf_kprobe_py_https = BPF(src_file = "./https/https_py_tcp.c")
 bpf_kprobe_py_https.attach_kprobe(event="tcp_sendmsg", fn_name="trace_py_tcp_sendmsg")
 
-py_https_sessions = bpf_kprobe_https.get_table("sessions")
+py_https_sessions = bpf_kprobe_py_https.get_table("sessions")
 py_https_packet_count = 0
 py_https_packet_dictionary = {}
 bpf_kprobe_py_https["events_py_https"].open_perf_buffer(print_py_https)
