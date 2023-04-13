@@ -37,7 +37,6 @@ parser = argparse.ArgumentParser(description='[*] Please install and deploy the 
                                     python3 mygod.py -f udp http --gotls /path/to/go_program\n\
                                     \t\t\t......')
 
-#type是要传入的参数的数据类型  help是该参数的提示信息
 parser.add_argument('-l', '--libssl' , type=str, dest='libssl_path', default='/lib/x86_64-linux-gnu/libssl.so.3',
                     help= 'Choose the libssl.so file path, default [/lib/x86_64-linux-gnu/libssl.so.3]')
 
@@ -58,8 +57,6 @@ parser.add_argument('--gotls', type=str, dest='go_program_path', default='None',
 
 #获得传入的参数
 args = parser.parse_args()
-
-#print(args.interface,args.pid,args.libssl_path,args.protocal[0],args.pyssl,args.go_program_path)
 
 print(Flowgod_banner)
 
