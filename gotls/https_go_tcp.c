@@ -2,6 +2,7 @@
 #include <linux/fs.h>
 #include <net/sock.h>
 #include <linux/string.h>
+
 #define MAX_BUFFER_SIZE 400
 
 struct data_key {
@@ -50,7 +51,7 @@ BPF_PERF_OUTPUT(events_go_https);
 int trace_go_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
 {
 
-  //  bpf_trace_printk("5\n");
+
     //bpf_trace_printk("3");
     u16 sport = sk->sk_num;
     u16 dport = sk->sk_dport;
@@ -61,7 +62,6 @@ int trace_go_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
     u32 pid = pid_tgid >> 32;
     u32 tid = (u32)pid_tgid;
     u32 uid = bpf_get_current_uid_gid();
-
 
     struct session_key session_key = {};
     session_key.saddr = htonl(saddr);
@@ -91,6 +91,7 @@ int trace_go_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
         return 0;
     }
 
+   // bpf_trace_printk("5\n");
    // bpf_trace_printk("6\n");
 
     data.len = value->len;
@@ -101,12 +102,13 @@ int trace_go_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
     sessions.lookup_or_try_init(&session_key,&zero);
     struct Leaf * lookup_leaf = sessions.lookup(&session_key);
 	if(lookup_leaf) {
-		//send packet to userspace
-     //   bpf_trace_printk("7\n");
+
+      //  bpf_trace_printk("6\n");
 	    events_go_https.perf_submit(ctx, &data, sizeof(struct https_data));
 	    https_data.delete(&key);
         return 0;
     }
+
 
    // bpf_trace_printk("8\n");
     https_data.delete(&key);
