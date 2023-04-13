@@ -78,5 +78,5 @@ python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http --pyss
 python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http --gotls /path/to/go_program -p 1314
 ```
 
-演示视频：
+- 演示视频
 [![FlowGod使用演示视频](https://i.ytimg.com/vi/W-8VLt-Q4GI/maxresdefault.jpg)](https://youtu.be/W-8VLt-Q4GI "FlowGod使用演示视频")
