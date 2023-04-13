@@ -20,9 +20,9 @@ sudo apt-get install -y  make clang llvm libelf-dev libbpf-dev bpfcc-tools libbp
 # For RHEL8.2+
 sudo yum install libbpf-devel make clang llvm elfutils-libelf-devel bpftool bcc-tools bcc-devel
 ```
-`bcc`版本问题导致程序无法执行，请选择源码编译的方式安装（推荐[0.25.0版本](https://github.com/iovisor/bcc/releases/tag/v0.25.0))，相关issue参考链接：https://github.com/iovisor/bcc/issues/3993
+由于`bcc`版本问题导致程序无法执行，请选择源码编译的方式安装（推荐[0.25.0版本](https://github.com/iovisor/bcc/releases/tag/v0.25.0))，相关issue参考链接：https://github.com/iovisor/bcc/issues/3993
 ```
-# 建议先使用软件包的方式安装bcc，或运行FlowGod程序出现bcc版本问题，可参考下面的命令编译安装合适版本的bcc
+# 建议先使用软件包的方式安装bcc，若运行FlowGod程序出现bcc版本问题，可参考下面的命令编译安装合适版本的bcc
 
 apt purge bpfcc-tools libbpfcc python3-bpfcc
 wget https://github.com/iovisor/bcc/releases/download/v0.25.0/bcc-src-with-submodule.tar.gz
@@ -38,3 +38,45 @@ make
 checkinstall
 ```
 具体源码编译安装`bcc`的文档请参考：https://github.com/iovisor/bcc/blob/master/INSTALL.md
+
+Python相关包安装：`pip install -r requirements`
+
+## FlowGod参数指南
+``` 
+  -h, --help            显示FlowGod使用帮助信息并退出
+  
+  -l LIBSSL_PATH, --libssl LIBSSL_PATH      
+                        指定libssl.so相关文件路径，默认为 /lib/x86_64-linux-gnu/libssl.so.3
+                  
+  -i INTERFACE, --interface INTERFACE    
+                        指定需要捕获流量的网卡，默认为ens3
+                                        
+  -p PID, --pid PID     指定需要捕获的进程，默认捕获所有进程
+  
+  -f [{udp,http,https,all} ...], --protocol [{udp,http,https,all} ...]      
+                        指定需要捕获的协议类型，其中 all 代表 udp+http+https   
+                        
+  --pyssl               如果您需要捕获Python程序发出的HTTPS请求，请选择该参数
+  
+  --gotls GO_PROGRAM_PATH     
+                        如果您需要捕获Go程序发出的HTTPS请求，请选择该参数，并指定Go程序所在文件路径                        
+```
+
+## FlowGod使用示例
+- 监听pid为1314的进程从eth1网口发出的udp、http和https的请求
+```
+python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http https -p 1314
+```
+
+- 监听pid为1314的进程从eth1网口发出的udp、http和Python程序的https协议请求（目前FlowGod不支持同时指定https和pyssl参数）
+```
+python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http --pyssl -p 1314
+```
+
+- 监听pid为1314的进程从eth1网口发出的udp、http和指定Go程序的https协议请求（目前FlowGod不支持同时指定https和gotls参数）
+```
+python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http --gotls /path/to/go_program -p 1314
+```
+
+演示视频：
+[![FlowGod使用演示视频](https://i.ytimg.com/vi/W-8VLt-Q4GI/maxresdefault.jpg)](https://youtu.be/W-8VLt-Q4GI "FlowGod使用演示视频")
