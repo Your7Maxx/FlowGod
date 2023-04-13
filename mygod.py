@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(description='[*] Please install and deploy the 
                                     \t\t\t......')
 
 #type是要传入的参数的数据类型  help是该参数的提示信息
-parser.add_argument('-l', '--libssl' , type=str, nargs=1, dest='libssl_path', default='/lib/x86_64-linux-gnu/libssl.so.3',
+parser.add_argument('-l', '--libssl' , type=str, dest='libssl_path', default='/lib/x86_64-linux-gnu/libssl.so.3',
                     help= 'Choose the libssl.so file path, default [/lib/x86_64-linux-gnu/libssl.so.3]')
 
 parser.add_argument('-i', '--interface', type=str, default='ens3', dest='interface',
@@ -70,12 +70,12 @@ global_arg = Global(args.libssl_path, args.interface, args.pid, args.go_program_
 
 print("[*] FlowGod is starting ...")
 print("[*] FlowGod will work with the following parameters：")
-print(f"{green}[+] Libssl_path: " + global_arg.libssl_path)
-print(f"{green}[+] Interface: " + global_arg.interface)
-print(f"{green}[+] Process: [pid] " + global_arg.pid)
+print(f"{green}[+] Libssl_path: " + str(global_arg.libssl_path))
+print(f"{green}[+] Interface: " + str(global_arg.interface))
+print(f"{green}[+] Process: [pid] " + str(global_arg.pid))
 print(f"{green}[+] protocal: " + str(args.protocal[0]))
 print(f"{green}[+] pyssl: " + str(args.pyssl))
-print(f"{green}[+] gotls: " + global_arg.go_program_path)
+print(f"{green}[+] gotls: " + str(global_arg.go_program_path))
 
 
 sys.path.append('./user/')
