@@ -83,7 +83,7 @@ python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http --gotl
 
 
 ## 项目借鉴
-[1] [bcc官方项目](https://github.com/iovisor/bcc)examples/tools    
+[1] [bcc官方项目](https://github.com/iovisor/bcc)：examples/tools    
 [2] [eCapture(旁观者)](https://github.com/gojue/ecapture): capture SSL/TLS text content without CA cert Using eBPF
 
 - 特别鸣谢：[CFC4N](https://github.com/cfc4n) 在ecapture项目的discussion中对作者的建议和解答
