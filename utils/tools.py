@@ -112,15 +112,10 @@ def get_go_version(binary_file):
         return 1
 
 def cleanup(bpf_sessions):
-    # get current time in seconds
     current_time = int(time.time())
-    # looking for leaf having:
-    # timestap  == 0        --> update with current timestamp
-    # AGE > MAX_AGE_SECONDS --> delete item
     for key, leaf in bpf_sessions.items():
         try:
             current_leaf = bpf_sessions[key]
-            # set timestamp if timestamp == 0
             if (current_leaf.timestamp == 0):
                 bpf_sessions[key] = bpf_sessions.Leaf(current_time)
             else:
