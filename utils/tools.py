@@ -110,3 +110,23 @@ def get_go_version(binary_file):
     else:
         print("[*] 检测到目标程序的go编译版本大于1.17.0")
         return 1
+
+def cleanup(bpf_sessions):
+    # get current time in seconds
+    current_time = int(time.time())
+    # looking for leaf having:
+    # timestap  == 0        --> update with current timestamp
+    # AGE > MAX_AGE_SECONDS --> delete item
+    for key, leaf in bpf_sessions.items():
+        try:
+            current_leaf = bpf_sessions[key]
+            # set timestamp if timestamp == 0
+            if (current_leaf.timestamp == 0):
+                bpf_sessions[key] = bpf_sessions.Leaf(current_time)
+            else:
+                # delete older entries
+                if (current_time - current_leaf.timestamp > MAX_AGE_SECONDS):
+                    del bpf_sessions[key]
+        except:
+            print("cleanup exception.")
+    return
