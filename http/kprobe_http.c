@@ -27,20 +27,19 @@ int trace_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk) {
     u32 daddr = sk->sk_daddr;
     u64 pid_tgid = bpf_get_current_pid_tgid();
     u64 uid_gid = bpf_get_current_uid_gid();
-        // Forming the key structure.
-        // These strange transformations will be explained below.
+ 
     struct data_key key = {};
     key.src_ip = htonl(saddr);
     key.dst_ip = htonl(daddr);
     key.src_port = sport;
     key.dst_port = htons(dport);
-        // Forming a structure with the process properties:
+        
     struct data_value value = {};
     value.pid = pid_tgid >> 32;
     value.uid = (u32)uid_gid;
     value.gid = uid_gid >> 32;
     bpf_get_current_comm(value.comm, 64);
-        //Writing the value into the eBPF table:
+      
     proc_http_datas.update(&key, &value);
 
     return 0;
