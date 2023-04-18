@@ -23,7 +23,7 @@ struct data_value {
  };
 
 BPF_TABLE("extern", struct data_key, struct data_value, proc_udp_datas, 20480);
-// Table for transferring data to the user space:
+
 BPF_PERF_OUTPUT(events_udp);
 
  int udp_matching(struct __sk_buff *skb){
