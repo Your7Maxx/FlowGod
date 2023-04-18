@@ -82,7 +82,7 @@ def print_https(cpu, data, size,):
             #print(https_packet_count)
             if (((https_packet_count) % CLEANUP_N_PACKETS) == 0):
                 cleanup(https_sessions)
-            #print(t)
+
         else:
             buf_size = 0
             buf = b""
