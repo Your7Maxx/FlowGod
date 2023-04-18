@@ -35,7 +35,7 @@ BPF_PERCPU_ARRAY(ssl_data, struct probe_SSL_data_t, 1);
 
 BPF_TABLE_PUBLIC("hash", struct data_key, struct data_value, https_data, 4096);
 
-//BPF_PERF_OUTPUT(perf_SSL_rw);
+
 BPF_HASH(start_ns, u32);
 BPF_HASH(bufs, u32, u64);
 int probe_SSL_rw_enter(struct pt_regs *ctx, void *ssl, void *buf, int num) {
@@ -104,7 +104,7 @@ static int SSL_exit(struct pt_regs *ctx, int rw) {
 
         https_data.update(&key, &value);
 
-     //   perf_SSL_rw.perf_submit(ctx, data, EVENT_SIZE(buf_copy_size));
+     
         return 0;
 }
 int probe_SSL_read_exit(struct pt_regs *ctx) {
