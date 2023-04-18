@@ -91,9 +91,6 @@ int trace_go_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
         return 0;
     }
 
-   // bpf_trace_printk("5\n");
-   // bpf_trace_printk("6\n");
-
     data.len = value->len;
     bpf_probe_read(&(data.buf), MAX_BUFFER_SIZE, (char *)(value->buf));
 
@@ -103,14 +100,12 @@ int trace_go_tcp_sendmsg(struct pt_regs *ctx, struct sock *sk)
     struct Leaf * lookup_leaf = sessions.lookup(&session_key);
 	if(lookup_leaf) {
 
-      //  bpf_trace_printk("6\n");
 	    events_go_https.perf_submit(ctx, &data, sizeof(struct https_data));
 	    https_data.delete(&key);
         return 0;
     }
 
 
-   // bpf_trace_printk("8\n");
     https_data.delete(&key);
     return 0;
 
