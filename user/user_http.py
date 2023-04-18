@@ -62,7 +62,7 @@ def print_http(cpu,data,size):
                 if ((payload_str[:3] == b'GET') or (payload_str[:4] == b'POST')
                 or (payload_str[:4] == b'HTTP') or (payload_str[:3] == b'PUT')
                 or (payload_str[:6] == b'DELETE') or (payload_str[:4] == b'HEAD')):
-                    #print("222222222222222222222")
+                  
                     if (((payload_str[:3] == b'GET' or payload_str[:4] == b'HEAD' or payload_str[:6] == b'DELETE') and (crlf2_0 in payload_str))
                     or ((payload_str[:4] == b'POST' or payload_str[:3] == b'PUT') and (crlf2 in payload_str) and (crlf2_0 not in payload_str))):
                         #print("3333333333333333333333")
@@ -90,12 +90,12 @@ def print_http(cpu,data,size):
                         except:
                             print("error during delete from bpf map")
                     else:
-                    #   print("3333333333")
+                  
                         http_packet_dictionary[binascii.hexlify(current_Key)] = payload_str
                 else:
-                    #print("44444444")
+                
                     if (current_Key in http_sessions):
-                        #print("555555555")
+                   
                         if (binascii.hexlify(current_Key) in http_packet_dictionary):
                             http_pre_string = http_packet_dictionary[binascii.hexlify(current_Key)]
                             if (crlf not in payload_str):
@@ -184,11 +184,3 @@ def init(global_arg):
 def run(http):
     http.http_buffer_poll()
 
-
-'''
-    while True:
-        try:
-            http.bpf_sock_http.perf_buffer_poll()
-        except KeyboardInterrupt:
-            exit()
-'''
