@@ -117,11 +117,3 @@ def run(udp):
     udp.udp_buffer_poll()
 
 
-'''
-    while True:
-        try:
-            udp.bpf_sock_udp.perf_buffer_poll()
-        except KeyboardInterrupt:
-            exit()
-'''
-
