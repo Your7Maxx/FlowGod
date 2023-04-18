@@ -52,7 +52,6 @@ int go_https_register(struct pt_regs *ctx){
     struct data_key data_k = {};
     struct data_value data_v = {};
 
-    //u8 buf[256] = {0};
     s32 len, record_type;
     const char *str;
     void *len_ptr;
@@ -67,9 +66,7 @@ int go_https_register(struct pt_regs *ctx){
         return 0;
     }
 
-//    bpf_trace_printk("2\n");
 
-   // struct data_t data = {};
     u64 pid_tgid = bpf_get_current_pid_tgid();
     u32 pid = pid_tgid >> 32;
     u32 tid = (u32)pid_tgid;
@@ -88,10 +85,7 @@ int go_https_register(struct pt_regs *ctx){
 
     bpf_probe_read_user(&data_v.buf,sizeof(data_v.buf),(void *)str);
 
-  //  bpf_trace_printk("3\n");
     https_data.update(&data_k, &data_v);
-   // events.perf_submit(ctx, &data, sizeof(data));
-
 
     return 0;
 
@@ -139,8 +133,6 @@ int go_https_stack(struct pt_regs *ctx){
 
     https_data.update(&data_k, &data_v);
 
- //   bpf_trace_printk("3\n");
-  //  events.perf_submit(ctx, &data, sizeof(data));
     return 0;
 
 }
