@@ -6,8 +6,6 @@ import tools
 
 global_arg = tools.Global("all","ens3","all","/root/go/src/hello/hello_1.20.2")
 
-print("test")
-
 sys.path.append('./user/')
 import user_go_https
 
