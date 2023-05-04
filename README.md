@@ -37,7 +37,7 @@ cmake -DCMAKE_INSTALL_PREFIX=/usr -DPYTHON_CMD=python3 ..
 make
 checkinstall
 ```
-具体源码编译安装`bcc`的文档请参考：https://github.com/iovisor/bcc/blob/master/INSTALL.md
+具体源码编译安装`bcc`的文档请参考：https://github.com/iovisor/bcc/blob/master/INSTALL.md （推荐）
 
 Python相关包安装：`pip install -r requirements`
 
