@@ -43,14 +43,14 @@ static struct data_value *make_event_1(){
         return bpf_context_1.lookup(&id);
 }
 
-//通过堆栈读取入参
+
 static void* go_get_argument_by_stack(struct pt_regs *ctx, int index) {
 	    void* ptr = 0;
 	    bpf_probe_read(&ptr, sizeof(ptr), (void *)(PT_REGS_SP(ctx)+(index*8)));
 	    return ptr;
 	}
 
-
+//通过寄存器读取入参
 int go_https_register(struct pt_regs *ctx){
 
     struct data_key data_k = {};
@@ -96,7 +96,7 @@ int go_https_register(struct pt_regs *ctx){
 
 }
 
-
+//通过堆栈读取入参
 int go_https_stack(struct pt_regs *ctx){
 
     struct data_key data_k = {};
