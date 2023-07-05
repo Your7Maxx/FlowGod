@@ -56,10 +56,10 @@ Python相关包安装：`pip install -r requirements`
   -f [{udp,http,https,all} ...], --protocol [{udp,http,https,all} ...]      
                         指定需要捕获的协议类型，其中 all 代表 udp+http+https   
                         
-  --pyssl               如果您需要捕获Python程序发出的HTTPS请求，请选择该参数
+  --pyssl               指定需要捕获Python程序发出的HTTPS请求
   
   --gotls GO_PROGRAM_PATH     
-                        如果您需要捕获Go程序发出的HTTPS请求，请选择该参数，并指定Go程序所在文件路径                        
+                        指定需要捕获Go程序发出的HTTPS请求，并提供Go程序所在文件路径                        
 ```
 
 ## FlowGod使用示例
