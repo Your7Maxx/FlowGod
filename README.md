@@ -9,7 +9,7 @@ FlowGod is a powerful process-level network flow sniffer tool based on eBPF.
                                  | |    | | (_) \ V  V /| |__| | (_) | (_| |
                                  |_|    |_|\___/ \_/\_/  \_____|\___/ \__,_|
 ```
-FlowGod supports a variety of common protocols: UDP & TCP & HTTP & HTTPS (curl/wget/nc/python/go).
+FlowGod supports a variety of common protocols: UDP & TCP & HTTP & HTTPS & DNS (curl/wget/nc/python/go).
 
 ## 食用指南
 安装`bcc`相关环境和依赖（软件包安装方式）：
@@ -53,8 +53,8 @@ Python相关包安装：`pip install -r requirements`
                                         
   -p PID, --pid PID     指定需要捕获的进程，默认捕获所有进程
   
-  -f [{udp,http,https,all} ...], --protocol [{udp,http,https,all} ...]      
-                        指定需要捕获的协议类型，其中 all 代表 udp+http+https   
+  -f [{udp,http,https,all} ...], --protocol [{udp,http,https,dns,all} ...]      
+                        指定需要捕获的协议类型，其中 all 代表 udp+http+https+dns   
                         
   --pyssl               指定需要捕获Python程序发出的HTTPS请求
   
