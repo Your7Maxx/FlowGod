@@ -50,8 +50,9 @@ def print_udp(cpu,data,size):
             port_src = str(int.from_bytes(port_src_str,"big"))
             port_dst = str(int.from_bytes(port_dst_str,"big"))
 
-            print("[*] 原始数据报处理后提取的ip/端口信息：")
+            print("[*] 原始数据报处理后提取的五元组信息：")
             print(int2ip(ip_src)+"[{}]".format(port_src)+"---->"+int2ip(ip_dst)+"[{}]".format(port_dst))
+            print("-------------------------------------------------------------------------------")
 
             payload_header = ETH_HLEN + ip_header_length + UDP_HLEN
             print("[*] 原始数据报处理后提取的payload信息：")
