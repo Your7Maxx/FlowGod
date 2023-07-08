@@ -69,10 +69,10 @@ def print_http(cpu,data,size):
                     or ((payload_str[:4] == b'POST' or payload_str[:3] == b'PUT') and (crlf2 in payload_str) and (crlf2_0 not in payload_str))):
                         #print("3333333333333333333333")
                     #  print(payload_str.decode())
-                        print("[*] 原始数据报处理后提取的五元组信息：")
+                        print("[HTTP] 原始数据报处理后提取的五元组信息：")
                         print(int2ip(ip_src)+"[{}]".format(str(port_src))+"---->"+int2ip(ip_dst)+"[{}]".format(str(port_dst)))
                         print("-------------------------------------------------------------------------------")
-                        print("[*] 原始数据报处理后提取的请求信息：")
+                        print("[HTTP] 原始数据报处理后提取的请求信息：")
                         print("-------------------------------------------------------------------------------")
                         printUntilCRLF(payload_str,'bytestr')
                         print("-------------------------------------------------------------------------------")

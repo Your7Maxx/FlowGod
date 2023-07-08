@@ -25,10 +25,10 @@ def print_py_https(cpu,data,size):
    # print(payload_str)
     if ((payload_str[:3] == b'GET') or (payload_str[:4] == b'HEAD') or (payload_str[:6] == b'DELETE')):
         if payload_str[-4:] == crlf2:
-            print("[*] 原始数据报处理后提取的五元组信息：")
+            print("[HTTPS_PY] 原始数据报处理后提取的五元组信息：")
             print(str(int2ip(event.saddr))+"[{}]".format(str(event.sport))+"---->"+str(int2ip(event.daddr))+"[{}]".format(str(event.dport)))
             print("-------------------------------------------------------------------------------")
-            print("[*] 原始数据报处理后提取的请求信息：")
+            print("[HTTPS_PY] 原始数据报处理后提取的请求信息：")
             printUntilCRLF(payload_str, 'bytestr')
             print("-------------------------------------------------------------------------------")
 

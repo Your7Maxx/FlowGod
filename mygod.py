@@ -34,6 +34,7 @@ parser = argparse.ArgumentParser(description='[*] Please install and deploy the 
                                     python3 mygod.py -i ens33 -f udp http https\n\
                                     python3 mygod.py -i ens33 -f all\n\
                                     python3 mygod.py -i ens33 --pyssl\n\
+                                    python3 mygod.py -i ens33 -f dns\n\
                                     python3 mygod.py -f udp http --gotls /path/to/go_program\n\
                                     \t\t\t......')
 
@@ -46,7 +47,7 @@ parser.add_argument('-i', '--interface', type=str, default='ens3', dest='interfa
 parser.add_argument('-p','--pid', type=str, default='all', dest='pid',
                     help= 'Choose the pid you want to capture, default [all]')
 
-parser.add_argument('-f','--protocol', nargs='*', choices=['udp','http','https','all'], action='append', dest='protocal', required=True,
+parser.add_argument('-f','--protocol', nargs='*', choices=['udp','http','https','all','dns'], action='append', dest='protocal', required=True,
                     help= 'Choose the protocals you want to capture')
 
 parser.add_argument('--pyssl', action="store_true", dest='pyssl',
@@ -76,7 +77,7 @@ print(f"{green}[+] gotls: " + str(global_arg.go_program_path))
 
 
 sys.path.append('./user/')
-import user_go_https, user_http, user_https, user_py_https, user_udp
+import user_go_https, user_http, user_https, user_py_https, user_udp, user_dns
 
 
 protocal_dict = {'udp':user_udp,
@@ -84,6 +85,7 @@ protocal_dict = {'udp':user_udp,
                  'https':user_https,
                  'pyhttps':user_py_https,
                  'gohttps':user_go_https,
+                 'dns':user_dns,
                  }
 
 
@@ -111,6 +113,7 @@ else:
       udp = protocal_dict['udp'].init(global_arg)
       http = protocal_dict['http'].init(global_arg)
       https = protocal_dict['https'].init(global_arg)
+      dns = protocal_dict['dns'].init(global_arg)
 
       print("--------------------------------------Start------------------------------------")
 
@@ -119,15 +122,17 @@ else:
       t1 = threading.Thread(target=user_udp.run, kwargs={"udp": udp})
       t2 = threading.Thread(target=user_http.run, kwargs={"http": http})
       t3 = threading.Thread(target=user_https.run, kwargs={"https": https})
+      t4 = threading.Thread(target=user_dns.run, kwargs={"dns": dns})
 
       threads.append(t1)
       threads.append(t2)
       threads.append(t3)
+      threads.append(t4)
 
-      for i in range(3):
+      for i in range(4):
         threads[i].start()
 
-      for i in range(3):
+      for i in range(4):
         threads[i].join()
 
   else:

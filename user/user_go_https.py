@@ -26,10 +26,10 @@ def print_go_https(cpu,data,size):
             or (payload_bytes_str[:4] == b'HTTP') or (payload_bytes_str[:3] == b'PUT')
             or (payload_bytes_str[:6] == b'DELETE') or (payload_bytes_str[:4] == b'HEAD')):
         if crlf2 in payload_bytes_str:
-            print("[*] 原始数据报处理后提取的五元组信息：")
+            print("[HTTPS_GO] 原始数据报处理后提取的五元组信息：")
             print(str(int2ip(event.saddr))+"[{}]".format(str(event.sport))+"---->"+str(int2ip(event.daddr))+"[{}]".format(str(event.dport)))
             print("-------------------------------------------------------------------------------")
-            print("[*] 原始数据报处理后提取的请求信息：")
+            print("[HTTPS_GO] 原始数据报处理后提取的请求信息：")
             printUntilCRLF(payload_str,'str')
             print("-------------------------------------------------------------------------------")
 

@@ -5,6 +5,7 @@ import time
 import subprocess
 import re
 import binascii
+import dnslib
 
 crlf2 = b'\r\n\r\n'
 crlf2_0 = b'\r\n\r\n\x00'
