@@ -11,7 +11,7 @@ FlowGod is a powerful process-level network flow sniffer tool based on eBPF.
 ```
 FlowGod supports a variety of common protocols: UDP & TCP & HTTP & HTTPS & DNS (curl/wget/nc/python/go).
 
-## 食用指南
+## Installation
 安装`bcc`相关环境和依赖（软件包安装方式）：
 ```
 # For Ubuntu20.10+
@@ -41,7 +41,7 @@ checkinstall
 
 Python相关包安装：`pip install -r requirements`
 
-## FlowGod参数指南
+## Usage
 ``` 
   -h, --help            显示FlowGod使用帮助信息并退出
   
@@ -62,7 +62,7 @@ Python相关包安装：`pip install -r requirements`
                         指定需要捕获Go程序发出的HTTPS请求，并提供Go程序所在文件路径                        
 ```
 
-## FlowGod使用示例
+## Examples
 - 监听pid为1314的进程从eth1网口发出的udp、http和https的请求
 ```
 python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http https -p 1314
@@ -83,13 +83,13 @@ python3 mygod.py -l /lib/x86_64-linux-gnu/libssl.so.3 -i eth1 -f udp http --gotl
 [![FlowGod使用演示视频](https://i.ytimg.com/vi/W-8VLt-Q4GI/maxresdefault.jpg)](https://youtu.be/W-8VLt-Q4GI "FlowGod使用演示视频")
 
 
-## 项目借鉴
+## Thanks
 [1] [bcc官方项目](https://github.com/iovisor/bcc)：examples/tools    
 [2] [eCapture(旁观者)](https://github.com/gojue/ecapture): capture SSL/TLS text content without CA cert Using eBPF
 
 - 特别鸣谢：[CFC4N](https://github.com/cfc4n) 在ecapture项目的discussion中对作者的建议和解答
 
-## TODOs
+## Todo
 - Dockerfile
 - CO-RE
 - NIPS
